@@ -21,7 +21,7 @@ import cx from '@src/cx.mjs';
 import { Textbox } from '@src/repl/components/panel/SettingsTab.jsx';
 
 export function PatternLabel({ pattern } /* : { pattern: Tables<'code'> } */) {
-  const meta = useMemo(() => getMetadata(pattern.code), [pattern]);
+  const meta = pattern.meta
 
   let title = meta.title;
   if (title == null) {
@@ -58,6 +58,11 @@ function PatternButtons({ patterns, activePattern, onClick, started }) {
   return (
     <div className="p-2">
       {Object.values(patterns)
+        .sort((a, b) => {
+          const x = ""
+          return (b.meta.title ?? "").localeCompare(a.meta.title ?? "")
+
+        })
         .reverse()
         .map((pattern) => {
           const id = pattern.id;
@@ -93,7 +98,7 @@ export function PatternsTab({ context }) {
     }
     return Object.fromEntries(
       Object.entries(userPatterns).filter(([_key, pattern]) => {
-        const meta = getMetadata(pattern.code);
+        const meta = pattern.meta;
 
         // Search for specific meta keys
         const searchLowercaseTrimmed = search.trim().toLowerCase();

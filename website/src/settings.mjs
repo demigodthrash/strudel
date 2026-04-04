@@ -3,6 +3,7 @@ import { useStore } from '@nanostores/react';
 import { register } from '@strudel/core';
 import { isUdels } from './repl/util.mjs';
 import { computed } from 'nanostores';
+import { getMetadata } from './metadata_parser';
 
 export const audioEngineTargets = {
   webaudio: 'webaudio',
@@ -71,6 +72,7 @@ export const $settings = computed(settingsMap, (state) => {
   Object.keys(userPatterns).forEach((key) => {
     const data = userPatterns[key];
     data.id = data.id ?? key;
+    data.meta = getMetadata(data.code)
     userPatterns[key] = data;
   });
   return {
