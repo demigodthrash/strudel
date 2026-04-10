@@ -19,6 +19,11 @@ export const soundFilterType = {
   ALL: 'all',
 };
 
+export const PATTERN_SORT = {
+  "NEWEST": "most recent",
+  "A-Z": "A-Z",
+}
+
 export const defaultSettings = {
   activeFooter: 'intro',
   keybindings: 'codemirror',

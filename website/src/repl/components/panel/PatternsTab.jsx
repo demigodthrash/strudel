@@ -9,9 +9,7 @@ import {
   userPattern,
 } from '../../../user_pattern_utils.mjs';
 import { useMemo, useRef } from 'react';
-import { getMetadata } from '../../../metadata_parser.js';
 import { useExamplePatterns } from '../../useExamplePatterns.jsx';
-import { parseJSON, isUdels } from '../../util.mjs';
 import { useSettings } from '../../../settings.mjs';
 import { ActionButton } from '../button/action-button.jsx';
 import { Pagination } from '../pagination/Pagination.jsx';
@@ -19,6 +17,11 @@ import { useState } from 'react';
 import { useDebounce } from '../usedebounce.jsx';
 import cx from '@src/cx.mjs';
 import { Textbox } from '@src/repl/components/panel/SettingsTab.jsx';
+
+const PATTERN_SORT = {
+  "NEWEST": "most recent",
+  "A-Z": "A-Z",
+}
 
 export function PatternLabel({ pattern } /* : { pattern: Tables<'code'> } */) {
   const meta = pattern.meta
@@ -59,7 +62,6 @@ function PatternButtons({ patterns, activePattern, onClick, started }) {
     <div className="p-2">
       {Object.values(patterns)
         .sort((a, b) => {
-          const x = ""
           return (b.meta.title ?? "").localeCompare(a.meta.title ?? "")
 
         })
