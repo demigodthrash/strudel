@@ -1,0 +1,37 @@
+name: Sync from Codeberg
+
+on:
+  schedule:
+    # Run every hour
+    - cron: '0 * * * *'
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Add Codeberg upstream
+        run: |
+          git remote add upstream https://codeberg.org/uzu/strudel.git || true
+          git fetch upstream --prune --tags
+
+      - name: Push all branches and tags to GitHub
+        run: |
+          git push --mirror origin
+
+      - name: Summary
+        run: |
+          echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branches:** $(git branch -r | grep -v HEAD | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags:** $(git tag | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Synced at:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
