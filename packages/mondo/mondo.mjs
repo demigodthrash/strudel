@@ -24,9 +24,15 @@ export class MondoParser {
     op: /^[*/:!@%?+\-&]|^\.{2}/, // * / : ! @ % ? ..
     // dollar: /^\$/,
     pipe: /^#/,
-    stack: /^[,$]/,
+    // Matches _$ or _$BASS
+    mute: /^_\$([a-zA-Z0-9_]+)?/,
+    // Matches S$ or S$VOCALS
+    solo: /^S\$([a-zA-Z0-9_]+)?/,
+    // stack: /^[,$]/,
+    stack: /^,|^\$([a-zA-Z0-9_]+)?/,
     or: /^[|]/,
     plain: /^[a-zA-Z0-9-~_^#]+/,
+ 
   };
   op_precedence = [['*', '/', ':', '!', '@', '%', '?', '+', '-', '..'], ['&']];
   // matches next token
@@ -62,6 +68,7 @@ export class MondoParser {
       offset += token.value.length;
       tokens.push(token);
     }
+    console.info("TOKENS", tokens[0], tokens[1])
     return tokens;
   }
   // take code, return abstract syntax tree
@@ -269,9 +276,11 @@ export class MondoParser {
           children = this.desugar_ops(children, ops);
         });
         children = this.desugar_pipes(children);
+        console.info("STACK CHILDREN", children)
         return children;
       }),
     );
+    console.info("CHILDREN", children)
     return children;
   }
   parse_list() {
