@@ -11,6 +11,7 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view';
+import {repeatCharKeymap} from './repeatcharacter.mjs';
 import { persistentAtom } from '@nanostores/persistent';
 import { logger, registerControl, repl } from '@strudel/core';
 import { cleanupDraw, cleanupDrawContext, Drawer } from '@strudel/draw';
@@ -111,6 +112,7 @@ export function initEditor({ initialCode = '', onChange, onEvaluate, onStop, roo
       syntaxHighlighting(defaultHighlightStyle),
       EditorView.updateListener.of((v) => onChange(v)),
       drawSelection({ cursorBlinkRate: 0 }),
+      repeatCharKeymap,
       Prec.highest(
         keymap.of([
           {
@@ -215,7 +217,6 @@ export function initEditor({ initialCode = '', onChange, onEvaluate, onStop, roo
               },
             };
           }),
-
           /* {
             key: 'Ctrl-Shift-.',
             run: () => (onPanic ? onPanic() : onStop?.()),
