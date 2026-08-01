@@ -49,10 +49,11 @@ lib['or'] = (...children) => chooseIn(...children); // always has structure but 
 //lib['or'] = (...children) => chooseOut(...children); // "s oh*8.dec[.04 | .5]" is better but "dec[.04 | .5].s oh*8" has no struct
 
 function evaluator(node, scope) {
-  const { type } = node;
-  // node is list
-  if (type === 'list') {
-    const { children } = node;
+  const { type,children } = node;
+  // node is list]
+  if (type === 'list' && children.length) {
+    // const { children } = node;
+   
     const [name, ...args] = children;
     // some functions wont be reified to make sure they work (e.g. see extend below)
     if (typeof name === 'function') {
@@ -65,6 +66,7 @@ function evaluator(node, scope) {
     const first = name.firstCycle(true)[0];
     const type = typeof first?.value;
     if (type !== 'function') {
+      console.error("first", first)
       throw new Error(`[mondough] expected function, got "${first?.value}"`);
     }
     return name
@@ -76,12 +78,16 @@ function evaluator(node, scope) {
       })
       .innerJoin();
   }
+
+  console.info("NODE", node)
   // node is leaf
   let { value } = node;
   if (type === 'plain' && scope[value]) {
     return reify(scope[value]); // -> local scope has no location
   }
   const variable = lib[value] ?? strudelScope[value];
+
+  console.info("VARIABLE", variable)
   // problem: collisions when we want a string that happens to also be a variable name
   // example: "s sine" -> sine is also a variable
   let pat;
@@ -107,6 +113,7 @@ export function mondo(code, offset = 0) {
     code = code.join('');
   }
   const pat = runner.run(code, undefined, offset);
+  console.info("MONDO_PAT", pat)
   return pat.markcss('color: var(--caret,--foreground);text-decoration:underline');
 }
 

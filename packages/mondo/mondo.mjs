@@ -5,6 +5,12 @@ This program is free software: you can redistribute it and/or modify it under th
 */
 
 // evolved from https://garten.salat.dev/lisp/parser.html
+
+let recurse = 0
+function lrec(...args) {
+  recurse += 1
+  console.info(recurse, ...args)
+}
 export class MondoParser {
   // these are the tokens we expect
   token_types = {
@@ -25,15 +31,16 @@ export class MondoParser {
     // dollar: /^\$/,
     pipe: /^#/,
     // Matches _$ or _$BASS
-    mute: /^_\$([a-zA-Z0-9_]+)?/,
+    mute_stack: /^_\$([a-zA-Z0-9_]+)?/,
     // Matches S$ or S$VOCALS
-    solo: /^S\$([a-zA-Z0-9_]+)?/,
+    solo_stack: /^S\$([a-zA-Z0-9_]+)?/,
     // stack: /^[,$]/,
     stack: /^,|^\$([a-zA-Z0-9_]+)?/,
     or: /^[|]/,
     plain: /^[a-zA-Z0-9-~_^#]+/,
- 
+
   };
+  solo_enabled = false;
   op_precedence = [['*', '/', ':', '!', '@', '%', '?', '+', '-', '..'], ['&']];
   // matches next token
   next_token(code, offset = 0) {
@@ -68,7 +75,7 @@ export class MondoParser {
       offset += token.value.length;
       tokens.push(token);
     }
-    console.info("TOKENS", tokens[0], tokens[1])
+    lrec("TOKENS", tokens[0], tokens[1])
     return tokens;
   }
   // take code, return abstract syntax tree
@@ -80,19 +87,22 @@ export class MondoParser {
     while (this.tokens.length) {
       expressions.push(this.parse_expr());
     }
+    let parsed = expressions[0]
     if (expressions.length === 0) {
       // empty case
-      return { type: 'list', children: [] };
-    }
+      parsed = { type: 'list', children: [] };
+    } else if (expressions.length > 1 || expressions[0].type !== 'list')
     // do we have multiple top level expressions or a single non list?
-    if (expressions.length > 1 || expressions[0].type !== 'list') {
-      return {
+    {
+      parsed = {
         type: 'list',
         children: this.desugar(expressions),
       };
     }
+
+    lrec("PARSED", parsed)
     // we have a single list
-    return expressions[0];
+    return parsed;
   }
   // parses any valid expression
   parse_expr() {
@@ -127,8 +137,11 @@ export class MondoParser {
       children = children.slice(splitIndex + 1);
     }
     chunks.push(children);
+    lrec("chunks", chunks)
     return chunks;
   }
+
+  
   desugar_split(children, split_type, next) {
     const chunks = this.split_children(children, split_type);
     if (chunks.length === 1) {
@@ -260,12 +273,15 @@ export class MondoParser {
     }
     return node;
   }
+
   desugar(children, type) {
     // if type is given, the first element is expected to contain it as plain value
     // e.g. with (square a b, c), we want to split (a b, c) and ignore "square"
     children = type ? children.slice(1) : children;
-    children = this.desugar_split(children, 'stack', (children) =>
-      this.desugar_split(children, 'or', (children) => {
+
+    const desugar_split_children = (children) => {
+      return this.desugar_split(children, 'or', (children) => {
+        console.info("TYPE", type)
         // chunks of multiple args
         if (type) {
           // the type we've removed before splitting needs to be added back
@@ -276,16 +292,34 @@ export class MondoParser {
           children = this.desugar_ops(children, ops);
         });
         children = this.desugar_pipes(children);
-        console.info("STACK CHILDREN", children)
+        lrec("STACK CHILDREN", children)
         return children;
-      }),
-    );
-    console.info("CHILDREN", children)
+      })
+
+    }
+
+    console.info("PRE_CHILDREN", children)
+    // children = this.desugar_split(children, 'mute_stack', (children) => {
+    //   const x = desugar_split_children(children)
+    //   // lrec({x})
+    //   return x
+    // })
+
+    lrec({ children })
+
+
+    children = this.desugar_split(children, 'stack', (children) => {
+      return desugar_split_children(children)
+    })
+
+
+    lrec("CHILDREN", children)
     return children;
   }
   parse_list() {
     let node = this.parse_pair('open_list', 'close_list');
     node.children = this.desugar(node.children);
+    lrec("node", node)
     return node;
   }
   parse_angle() {
@@ -334,9 +368,8 @@ export function printAst(ast, compact = false, lvl = 0) {
   const br = compact ? '' : '\n';
   const spaces = compact ? '' : Array(lvl).fill(' ').join('');
   if (ast.type === 'list') {
-    return `${lvl ? br : ''}${spaces}(${ast.children.map((child) => printAst(child, compact, lvl + 1)).join(' ')}${
-      ast.children.find((child) => child.type === 'list') ? `${br}${spaces})` : ')'
-    }`;
+    return `${lvl ? br : ''}${spaces}(${ast.children.map((child) => printAst(child, compact, lvl + 1)).join(' ')}${ast.children.find((child) => child.type === 'list') ? `${br}${spaces})` : ')'
+      }`;
   }
   return `${ast.value}`;
 }

@@ -1457,6 +1457,27 @@ export function stack(...pats) {
   return result;
 }
 
+
+/**
+ * The given items are played at the same time at the same length.
+ *
+ * @tags temporal
+ * @return {Pattern}
+ * @synonyms polyrhythm, pr
+ * @example
+ * mute_stack("g3", "b3", ["e4", "d4"]).note()
+ * // "g3,b3,[e4 d4]".note()
+ *
+ * @example
+ * // As a chained function:
+ * s("hh*4").mute_stack(
+ *   note("c4(5,8)")
+ * )
+ */
+export function mute_stack(...pats) {
+  return silence;
+}
+
 function _stackWith(func, pats) {
   pats = pats.map((pat) => (Array.isArray(pat) ? sequence(...pat) : reify(pat)));
   if (pats.length === 0) {
