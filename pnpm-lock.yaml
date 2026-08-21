@@ -312,8 +312,8 @@ importers:
         specifier: workspace:*
         version: link:../webaudio
       dough-synth:
-        specifier: 0.2.4
-        version: 0.2.4
+        specifier: 0.2.7
+        version: 0.2.7
     devDependencies:
       vite:
         specifier: ^6.0.11
@@ -4072,8 +4072,8 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
-  dough-synth@0.2.4:
-    resolution: {integrity: sha512-qMnMKVj1B2ivUgobNCwqJqNzZHOMN+5339OmCOk07zIDEK7iCYdufa+ZDE2BEgmKrWDyhGS7oTNFjHtTwzEv9w==}
+  dough-synth@0.2.7:
+    resolution: {integrity: sha512-Kj0tnDqu9Q8a9E8HepU5BN9lZcy+kYIYka7rn0o8NGfeSdxSe4m9luz7Hel0zqt33FCStk1nLPYsGmbdPfj3gA==}
     hasBin: true
 
   dset@3.1.4:
@@ -11794,7 +11794,7 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  dough-synth@0.2.4: {}
+  dough-synth@0.2.7: {}
 
   dset@3.1.4: {}
 
